@@ -14,7 +14,7 @@ install_common:
   image: python:3.11
   script:
     - python -m pip install --upgrade pip
-    - pip install --cache-dir=.cache/pip git+https://gitlab.com/yourgroup/common.git@main
+    - pip install --cache-dir=.cache/pip git+https://github.com/manivallepu/common-repo.git@main
   artifacts:
     paths:
       - .cache/pip
@@ -27,7 +27,7 @@ run_tests:
   dependencies:
     - install_common
   script:
-    - python -m pip install --cache-dir=.cache/pip git+https://gitlab.com/yourgroup/common.git@main
+    - python -m pip install --cache-dir=.cache/pip git+https://github.com/manivallepu/common-repo.git@main
     - pytest tests/
  
 # Stage 3: Run Airflow DAGs (CI simulation)
