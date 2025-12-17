@@ -1,0 +1,45 @@
+stages:
+  - prepare
+  - test
+  - airflow
+ 
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .cache/pip
+ 
+# Stage 1: Install common dynamically
+install_common:
+  stage: prepare
+  image: python:3.11
+  script:
+    - python -m pip install --upgrade pip
+    - pip install --cache-dir=.cache/pip git+https://gitlab.com/yourgroup/common.git@main
+  artifacts:
+    paths:
+      - .cache/pip
+    expire_in: 1 day
+ 
+# Stage 2: Run tests
+run_tests:
+  stage: test
+  image: python:3.11
+  dependencies:
+    - install_common
+  script:
+    - python -m pip install --cache-dir=.cache/pip git+https://gitlab.com/yourgroup/common.git@main
+    - pytest tests/
+ 
+# Stage 3: Run Airflow DAGs (CI simulation)
+airflow_ci:
+  stage: airflow
+  image: apache/airflow:2.10.3
+  dependencies:
+    - install_common
+  variables:
+    AIRFLOW_HOME: "/tmp/airflow"
+  script:
+    - python -m pip install --cache-dir=.cache/pip git+https://gitlab.com/yourgroup/common.git@main
+    - airflow db init
+    - airflow dags list
+    - airflow tasks test example_dag say_hello_task 2025-12-17
